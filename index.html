@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROCKET DASH — Space Survival</title>
+  <meta name="description" content="Control your rocket through 3 increasingly dangerous levels of asteroid fields and planetary obstacles. A highly polished space dodge game." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<div id="game-container">
+
+  <!-- Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Flash Overlay for hits -->
+  <div id="flash-overlay"></div>
+
+  <!-- ==================== LOADING SCREEN ==================== -->
+  <div class="screen" id="loading-screen">
+    <div style="text-align:center;">
+      <div class="loading-title">ROCKET DASH</div>
+      <div class="loading-sub">Loading Universe...</div>
+      <div class="loading-bar-track">
+        <div class="loading-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN MENU ==================== -->
+  <div class="screen hidden" id="main-menu">
+    <div class="glass-panel">
+      <img src="assets/rocket.png" alt="Rocket" class="rocket-logo" id="menu-rocket-img" />
+      <div class="game-title">ROCKET DASH</div>
+      <div class="game-subtitle">Space Survival</div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-play" onclick="Game.showLevelSelect()">
+          🚀 &nbsp; Launch Mission
+        </button>
+        <button class="btn btn-secondary" id="btn-how-to" onclick="Game.showHowTo()">
+          📖 &nbsp; How To Play
+        </button>
+      </div>
+      <div class="controls-hint" style="margin-top:20px;">
+        Move: <span>WASD</span> or <span>Arrow Keys</span> or <span>Mouse</span>
+      </div>
+    </div>
+    <div class="version-tag">v1.0 &nbsp;·&nbsp; Rocket Dash &nbsp;·&nbsp; Space Survival</div>
+  </div>
+
+  <!-- ==================== HOW TO PLAY ==================== -->
+  <div class="screen hidden" id="how-to-screen">
+    <div class="glass-panel" style="max-width:560px;">
+      <div class="result-title win" style="font-size:1.4rem; margin-bottom:20px;">HOW TO PLAY</div>
+      <div style="text-align:left; line-height:1.9; font-size:0.88rem; color:rgba(255,255,255,0.8);">
+        <p style="margin-bottom:12px;">🚀 <strong style="color:#00d4ff">Control your rocket</strong> through dangerous space corridors!</p>
+        <p style="margin-bottom:12px;">☄️ <strong style="color:#ff6b35">Dodge asteroids and planets</strong> — they move, bounce, and orbit!</p>
+        <p style="margin-bottom:12px;">🛡️ <strong style="color:#00d4ff">You have 3 Energy Shields.</strong> Each collision destroys one shield. No shields = Game Over!</p>
+        <p style="margin-bottom:12px;">🏁 <strong style="color:#00ff88">Complete the distance bar</strong> to clear each level.</p>
+        <p style="margin-bottom:12px;">⭐ <strong style="color:#ffd700">Earn up to 3 Stars</strong> per level based on shields remaining and time!</p>
+        <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:16px 0;" />
+        <p><span style="color:#00d4ff">Controls:</span> WASD / Arrow Keys to move, or move your mouse over the canvas.</p>
+        <p style="margin-top:8px;"><span style="color:#00d4ff">Pause:</span> Press <strong>P</strong> or <strong>Escape</strong></p>
+      </div>
+      <button class="btn btn-primary" style="margin-top:24px;" onclick="Game.showMainMenu()">Got It! &nbsp;→</button>
+    </div>
+  </div>
+
+  <!-- ==================== LEVEL SELECT ==================== -->
+  <div class="screen hidden" id="level-select">
+    <div class="glass-panel" style="max-width:580px;">
+      <div class="result-title" style="font-size:1.5rem; background: linear-gradient(135deg,#00d4ff,#9945ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">SELECT MISSION</div>
+      <p style="color:rgba(255,255,255,0.5); font-size:0.8rem; margin-top:6px; margin-bottom:6px;">Choose your danger level, Commander</p>
+      <div class="level-cards" id="level-cards-container">
+        <div class="level-card" id="lc-1" onclick="Game.startLevel(1)">
+          <div class="level-num">01</div>
+          <div class="level-name">ASTEROID BELT</div>
+          <div class="level-stars" id="ls-stars-1">☆☆☆</div>
+          <div class="level-diff level-1-diff">EASY</div>
+        </div>
+        <div class="level-card" id="lc-2" onclick="Game.startLevel(2)">
+          <div class="level-num">02</div>
+          <div class="level-name">PLANETARY DRIFT</div>
+          <div class="level-stars" id="ls-stars-2">☆☆☆</div>
+          <div class="level-diff level-2-diff">MEDIUM</div>
+        </div>
+        <div class="level-card" id="lc-3" onclick="Game.startLevel(3)">
+          <div class="level-num">03</div>
+          <div class="level-name">NEBULA CHAOS</div>
+          <div class="level-stars" id="ls-stars-3">☆☆☆</div>
+          <div class="level-diff level-3-diff">HARD</div>
+        </div>
+      </div>
+      <button class="btn btn-secondary" onclick="Game.showMainMenu()">← Back</button>
+    </div>
+  </div>
+
+  <!-- ==================== HUD ==================== -->
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <!-- Score -->
+      <div class="hud-panel">
+        <div class="hud-label">Score</div>
+        <div class="hud-value score-val" id="hud-score">0</div>
+      </div>
+      <!-- Shields -->
+      <div class="hud-panel shield-bar-container">
+        <div class="hud-label">Shields</div>
+        <div class="shields-row">
+          <div class="shield-pip active" id="pip-1"></div>
+          <div class="shield-pip active" id="pip-2"></div>
+          <div class="shield-pip active" id="pip-3"></div>
+        </div>
+      </div>
+      <!-- Speed -->
+      <div class="hud-panel">
+        <div class="hud-label">Speed</div>
+        <div class="hud-value speed-val" id="hud-speed">1.0x</div>
+      </div>
+    </div>
+
+    <!-- Pause Button -->
+    <button class="hud-pause-btn" id="btn-pause" onclick="Game.togglePause()" title="Pause (P)">⏸</button>
+
+    <!-- Distance Progress Bar -->
+    <div class="hud-bottom">
+      <div class="progress-container">
+        <div class="progress-header">
+          <span class="level-badge" id="hud-level-badge">LEVEL 1</span>
+          <span class="dist-text" id="hud-dist-text">0 / 1000m</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-fill" style="width:0%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PAUSE SCREEN ==================== -->
+  <div class="screen hidden" id="pause-screen">
+    <div class="glass-panel">
+      <div class="result-title" style="font-size:1.5rem; color:#00d4ff;">⏸ PAUSED</div>
+      <p style="color:rgba(255,255,255,0.5); margin: 10px 0 24px; font-size:0.85rem;">Mission on hold, Commander</p>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-resume" onclick="Game.togglePause()">▶ Resume</button>
+        <button class="btn btn-secondary" onclick="Game.restartLevel()">↺ Restart Level</button>
+        <button class="btn btn-secondary" onclick="Game.showLevelSelect()">⬅ Level Select</button>
+        <button class="btn btn-danger" onclick="Game.showMainMenu()">✕ Main Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LEVEL CLEAR ==================== -->
+  <div class="screen hidden" id="level-clear-screen">
+    <div class="glass-panel">
+      <div class="result-title win" id="lc-title">LEVEL CLEAR!</div>
+      <div class="result-subtitle" id="lc-subtitle">Excellent piloting, Commander</div>
+      <div class="stars-display" id="lc-stars">★★★</div>
+      <div class="result-stats">
+        <div class="stat-item">
+          <div class="stat-val" id="lc-score">0</div>
+          <div class="stat-label">Score</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" id="lc-time">0s</div>
+          <div class="stat-label">Time</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" id="lc-shields">3</div>
+          <div class="stat-label">Shields Left</div>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-next-level" onclick="Game.nextLevel()">Next Level →</button>
+        <button class="btn btn-secondary" onclick="Game.restartLevel()">↺ Replay</button>
+        <button class="btn btn-secondary" onclick="Game.showLevelSelect()">⬅ Level Select</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GAME OVER ==================== -->
+  <div class="screen hidden" id="game-over-screen">
+    <div class="glass-panel">
+      <div class="result-title lose">MISSION FAILED</div>
+      <div class="result-subtitle">Your shields were destroyed!</div>
+      <div style="font-size:3rem; margin:10px 0;">💥</div>
+      <div class="result-stats">
+        <div class="stat-item">
+          <div class="stat-val" id="go-score">0</div>
+          <div class="stat-label">Score</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" id="go-dist">0m</div>
+          <div class="stat-label">Distance</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" id="go-time">0s</div>
+          <div class="stat-label">Survived</div>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="Game.restartLevel()">↺ Try Again</button>
+        <button class="btn btn-secondary" onclick="Game.showLevelSelect()">⬅ Level Select</button>
+        <button class="btn btn-secondary" onclick="Game.showMainMenu()">✕ Main Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VICTORY SCREEN ==================== -->
+  <div class="screen hidden" id="victory-screen">
+    <div class="glass-panel" style="max-width:540px;">
+      <div style="font-size:3.5rem; margin-bottom:10px;">🏆</div>
+      <div class="result-title victory">MISSION COMPLETE!</div>
+      <div class="result-subtitle">You conquered all 3 levels! Legendary pilot!</div>
+      <div class="stars-display">★★★</div>
+      <div class="result-stats">
+        <div class="stat-item">
+          <div class="stat-val" id="vict-score">0</div>
+          <div class="stat-label">Total Score</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" id="vict-stars">0 / 9</div>
+          <div class="stat-label">Stars</div>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="Game.showMainMenu()">🏠 Main Menu</button>
+        <button class="btn btn-secondary" onclick="Game.showLevelSelect()">↺ Play Again</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
